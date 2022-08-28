@@ -1,13 +1,16 @@
-//------------------------------------------------------------------------------
-//--------------------------Code By: 3DSage-------------------------------------
-//----------------Video tutorial on YouTube-3DSage------------------------------
-//------------------------------------------------------------------------------
-
 #define _USE_MATH_DEFINES	// MVSC fix
 
 #include <math.h>
 #include <stdio.h>
 #include <GL/glut.h> 
+
+
+// Level select via header files - should be replaced with dynamic load
+//#include "lvl/tut1.h"
+//#include "lvl/table.h"
+//#include "lvl/tube.h"
+#include "lvl/doom.h"
+
 
 #define res        1                        //0=160x120 1=360x240 4=640x480
 #define SW         160*res                  //screen width
@@ -17,8 +20,7 @@
 #define pixelScale 4/res                    //OpenGL pixel scale
 #define GLSW       (SW*pixelScale)          //OpenGL window width
 #define GLSH       (SH*pixelScale)          //OpenGL window height
-#define numSect    4
-#define numWall    16
+
 
 
 // Structs
@@ -78,8 +80,8 @@ time T;
 keys K;
 //math M;
 player P;
-walls W[30];
-sectors S[30];
+walls W[100];	// make dynamic on level load?
+sectors S[100];
 
 
 // draw a pixel at x/y with rgb
@@ -148,7 +150,7 @@ void clipBehindPlayer(int *x1, int *y1, int *z1, int x2, int y2, int z2) // clip
 
 void drawWall(int x1, int x2, int b1, int b2, int t1, int t2, int c, int s)
 {
-	printf("surface:%d\n", S[s].surface);
+	//printf("surface:%d\n", S[s].surface);
 	int x, y;
 
 	// hold difference in distance
@@ -176,7 +178,6 @@ void drawWall(int x1, int x2, int b1, int b2, int t1, int t2, int c, int s)
 		if (y2 < 1) y2 = 1;
 		if (y1 > SH - 1) y1 = SH - 1;
 		if (y2 > SH - 1) y2 = SH - 1;
-
 
 		// Surface
 		if (S[s].surface == 1) { S[s].surf[x] = y1; continue; }		// Save bottom points
@@ -322,37 +323,6 @@ void KeysUp(unsigned char key, int x, int y)
 	if (key == ',' == 1) { K.sr = 0; }
 	if (key == '.' == 1) { K.sl = 0; }
 }
-
-int loadSectors[] =
-{ // wall start, wall end, z1, height, z2 height, bottom color, top color
-	 0,  4, 0, 40, 2, 3,	// Sector 1
-	 4,  8, 0, 40, 4, 5,	// Sector 2
-	 8, 12, 0, 40, 6, 7,	// Sector 3
-	12, 16, 0, 40, 0, 1,	// Sector 4
-};
-
-int loadWalls[] =
-{ // x1, y1, x2, y2, color
-	 0,  0, 32,  0, 0,
-	32,  0, 32, 32, 1,
-	32, 32,  0, 32, 0,
-	 0, 32,  0,  0, 1,
-
-	64,  0, 96,  0, 2,
-	96,  0, 96, 32, 3,
-	96, 32, 64, 32, 2,
-	64 ,32, 64,  0, 3,
-
-	64, 64, 96, 64, 4,
-	96, 64, 96, 96, 5,
-	96, 96, 64, 96, 4,
-	64, 96, 64, 64, 5,
-
-	 0, 64, 32, 64, 6,
-	32, 64, 32, 96, 7,
-	32, 96,  0, 96, 6,
-	 0, 96,  0, 64, 7,
-};
 
 void init()
 {
