@@ -12,12 +12,12 @@
 #include "lvl/doom.h"
 
 
-#define res        1                        //0=160x120 1=360x240 4=640x480
-#define SW         160*res                  //screen width
-#define SH         120*res                  //screen height
+//#define res        1                        //0=160x120 1=360x240 4=640x480
+#define SW         800                      //screen width
+#define SH         600                      //screen height
 #define SW2        (SW/2)                   //half of screen width
 #define SH2        (SH/2)                   //half of screen height
-#define pixelScale 4/res                    //OpenGL pixel scale
+#define pixelScale 1                        //OpenGL pixel scale
 #define GLSW       (SW*pixelScale)          //OpenGL window width
 #define GLSH       (SH*pixelScale)          //OpenGL window height
 
@@ -37,7 +37,8 @@ typedef struct
 {
 	int w, s, a, d; // move up, down, left, right
 	int sl, sr;     // strafe left, right 
-	int m;          // move up, down, look up, down
+	int m;          // move up, down, 
+	int up, dn;     //look up, down
 } keys;
 
 
@@ -120,19 +121,18 @@ void movePlayer()
 	if (K.a == 1) { P.x -= dy; P.y += dx; }
 
 	//move up, down, look up, look down
-	//if (K.a == 1 && K.m == 1) { P.l -= 1; }
-	//if (K.d == 1 && K.m == 1) { P.l += 1; }
 	if (K.w == 1 && K.m == 1) { P.z += 4; }
 	if (K.s == 1 && K.m == 1) { P.z -= 4; }
+	if (K.up == 1) { P.l -= 1; }
+	if (K.dn == 1) { P.l += 1; }
 }
 
 void clearBackground()
 {
 	int x, y;
 	for (y = 0; y < SH; y++)
-	{
-		for (x = 0; x < SW; x++) { pixel(x, y, 8); } //clear background color
-	}
+		for (x = 0; x < SW; x++)
+			pixel(x, y, 8); // clear background color
 }
 
 void clipBehindPlayer(int *x1, int *y1, int *z1, int x2, int y2, int z2) // clip line
@@ -301,14 +301,32 @@ void display(void)
 	glutPostRedisplay();
 }
 
+void SpecialKeysDown(int key, int x, int y)
+{
+	//printf("%d\n", key);
+	if (key == GLUT_KEY_LEFT) K.sr = 1;
+	if (key == GLUT_KEY_RIGHT) K.sl = 1;
+	if (key == GLUT_KEY_UP) K.up = 1;
+	if (key == GLUT_KEY_DOWN) K.dn = 1;
+
+}
+
+void SpecialKeysUp(unsigned char key, int x, int y)
+{
+	if (key == GLUT_KEY_LEFT) K.sr = 0;
+	if (key == GLUT_KEY_RIGHT) K.sl = 0;
+	if (key == GLUT_KEY_UP) K.up = 0;
+	if (key == GLUT_KEY_DOWN) K.dn = 0;
+}
+
 void KeysDown(unsigned char key, int x, int y)
 {
-	printf("%c\n", key);
+	//printf("%c\n", key);
 	if (key == 'w' == 1) { K.w = 1; }
 	if (key == 's' == 1) { K.s = 1; }
 	if (key == 'a' == 1) { K.a = 1; }
 	if (key == 'd' == 1) { K.d = 1; }
-	if (key == 'm' == 1) { K.m = 1; }
+	if (key == 'c' == 1) { K.m = 1; }
 	if (key == ',' == 1) { K.sr = 1; }
 	if (key == '.' == 1) { K.sl = 1; }
 }
@@ -319,7 +337,7 @@ void KeysUp(unsigned char key, int x, int y)
 	if (key == 's' == 1) { K.s = 0; }
 	if (key == 'a' == 1) { K.a = 0; }
 	if (key == 'd' == 1) { K.d = 0; }
-	if (key == 'm' == 1) { K.m = 0; }
+	if (key == 'c' == 1) { K.m = 0; }
 	if (key == ',' == 1) { K.sr = 0; }
 	if (key == '.' == 1) { K.sl = 0; }
 }
@@ -369,6 +387,8 @@ int main(int argc, char* argv[])
 	glutDisplayFunc(display);
 	glutKeyboardFunc(KeysDown);
 	glutKeyboardUpFunc(KeysUp);
+	glutSpecialFunc(SpecialKeysDown);
+	glutSpecialUpFunc(SpecialKeysUp);
 	// add arrow keys with glutSpecialFunc here
 	glutMainLoop();
 	return 0;
